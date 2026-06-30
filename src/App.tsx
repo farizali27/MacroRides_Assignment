@@ -1,122 +1,72 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from "react";
+import AppShell from "./components/layout/AppShell";
+import StatusBar from "./components/layout/StatusBar";
+import ControlPanel from "./components/layout/ControlPanel";
+import Legend from "./components/layout/Legend";
+import MapView from "./components/map/MapView";
+import { PICKUP_POINTS } from "./constants/coordinates";
+import { INITIAL_DRIVER_STATE } from "./types/simulation";
+import { INITIAL_ROUTE_STATE } from "./types/route";
+import "./App.css";
 
+/**
+ * Top-level composition only. All state below is a placeholder so the
+ * layout shells have something to render and type-check against — none
+ * of it is wired to real logic yet. Replace these useState calls with your
+ * actual hooks (useOsrmRoute, useCorridor, useEligiblePickups,
+ * useDriverSimulation) as you build through the roadmap phases.
+ */
 function App() {
-  const [count, setCount] = useState(0)
+  const [driverState, setDriverState] = useState(INITIAL_DRIVER_STATE);
+  const [routeState, setRouteState] = useState(INITIAL_ROUTE_STATE)
+  const [isRecalculating] = useState(false);
+
+  // Stub eligibility — replace with useEligiblePickups output in Phase 4.
+  const eligibleCount = 0;
+
+  const handleStartDrive = () => {
+    // TODO (Phase 5): kick off useDriverSimulation
+  };
+
+  const handlePauseDrive = () => {
+    // TODO (Phase 5): pause useDriverSimulation
+  };
+
+  const runSimulation = () => {
+    // TODO (Phase 5/6): reset driver position, clear any deviation state
+    console.log("run simulation")
+  };
+
+  const handleSimulateDeviation = () => {
+    // TODO (Phase 6): pick a deviation point, re-run OSRM + corridor + eligibility
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <AppShell
+      sidebar={
+        <>
+          <StatusBar
+            driverStatus={driverState.status}
+            driverPosition={driverState.position}
+            eligibleCount={eligibleCount}
+            totalPickupCount={PICKUP_POINTS.length}
+            routeDistanceMeters={null}
+          />
+          <ControlPanel
+            driverStatus={driverState.status}
+            isRecalculating={isRecalculating}
+            onResumeDrive={handleStartDrive}
+            onPauseDrive={handlePauseDrive}
+            onRunSimulation={runSimulation}
+            onSimulateDeviation={handleSimulateDeviation}
+          />
+          <Legend />
+        </>
+      }
+      map={<MapView />}
+    />
+  );
 }
 
-export default App
+export default App;
+// define and initialize routeState

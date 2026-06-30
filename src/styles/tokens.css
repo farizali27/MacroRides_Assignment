@@ -1,0 +1,43 @@
+/**
+ * Design tokens — the instrument-panel palette and type scale for this app.
+ * Everything else (Tailwind utility usage, component styles) should pull
+ * from these variables rather than hardcoding hex values, so the palette
+ * stays consistent and easy to retune in one place.
+ */
+
+:root {
+  /* Surfaces */
+  --color-bg: #0b1215;          /* app background, near-black ink */
+  --color-panel: #15212a;       /* sidebar / card surface */
+  --color-panel-raised: #1c2b35; /* hover / active panel state */
+  --color-border: #243640;      /* hairline borders on panels */
+
+  /* Text */
+  --color-text-primary: #e7edf0;
+  --color-text-muted: #7a8b94;
+
+  /* Signal colors — each maps to one map/UI concept, kept stable everywhere */
+  --color-driver: #1fe3a8;      /* live driver position, "active" state */
+  --color-route: #3d8bff;       /* the OSRM route line */
+  --color-corridor: #3d8bff;    /* corridor fill, used at low opacity */
+  --color-eligible: #1fe3a8;    /* eligible pickup point */
+  --color-ineligible: #4a5a63;  /* ineligible pickup point */
+  --color-deviation: #f2a93b;   /* deviation / alert state */
+  --color-danger: #ef5b5b;      /* error states */
+
+  /* Type */
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+
+  /* Spacing scale used by layout shells */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+
+  /* Layout */
+  --sidebar-width: 320px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+}

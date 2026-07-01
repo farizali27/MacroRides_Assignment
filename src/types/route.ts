@@ -21,15 +21,15 @@ export interface RouteState {
   status: "idle" | "loading" | "ready" | "error";
   /** Leaflet-ready coordinates, already converted from OSRM's [lng, lat]. */
   path: LatLng[];
-  distanceMeters: number | null;
-  durationSeconds: number | null;
+  source: LatLng | null;
+  destination: LatLng | null;
   error: string | null;
 }
 
 export const INITIAL_ROUTE_STATE: RouteState = {
   status: "idle",
   path: [],
-  distanceMeters: null,
-  durationSeconds: null,
+  source: null,
+  destination: null,
   error: null,
 };

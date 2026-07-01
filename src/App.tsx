@@ -4,10 +4,13 @@ import StatusBar from "./components/layout/StatusBar";
 import ControlPanel from "./components/layout/ControlPanel";
 import Legend from "./components/layout/Legend";
 import MapView from "./components/map/MapView";
-import { PICKUP_POINTS } from "./constants/coordinates";
+import { getRandomSourceDestination, PICKUP_POINTS } from "./constants/coordinates";
 import { INITIAL_DRIVER_STATE } from "./types/simulation";
-import { INITIAL_ROUTE_STATE } from "./types/route";
+import { INITIAL_ROUTE_STATE, type OsrmRouteResponse } from "./types/route";
 import "./App.css";
+import { fetchOsrmRoute } from "./utils/fetchOsrmRoute";
+import { convertFormat } from "./utils/convertFormat";
+import RouteLayer from "./components/map/RouteLayer";
 
 /**
  * Top-level composition only. All state below is a placeholder so the
@@ -32,9 +35,35 @@ function App() {
     // TODO (Phase 5): pause useDriverSimulation
   };
 
-  const runSimulation = () => {
+  const runSimulation = async () => {
     // TODO (Phase 5/6): reset driver position, clear any deviation state
-    console.log("run simulation")
+    const { SOURCE, DESTINATION } = getRandomSourceDestination()
+    setRouteState(prevState => ({
+      ...prevState,
+      status: "loading",
+      source: SOURCE,
+      destination: DESTINATION
+    }))
+
+    const osrmURL = `http://router.project-osrm.org/route/v1/driving/${SOURCE.lng},${SOURCE.lat};${DESTINATION.lng},${DESTINATION.lat}?overview=full&geometries=geojson`
+
+    console.log("running")
+    try {
+      const data = await fetchOsrmRoute<OsrmRouteResponse>(osrmURL);
+      const osrmRoute = data.routes[0].geometry.coordinates
+      const route = convertFormat(osrmRoute)
+      setRouteState(prevState => ({
+        ...prevState,
+        status: "ready",
+        path: route
+      }))
+      setRouteState(prevState => ({
+        ...prevState,
+        status: "error"
+      }))
+    } catch (err) {
+      console.log(err)
+    }
   };
 
   const handleSimulateDeviation = () => {
@@ -63,10 +92,12 @@ function App() {
           <Legend />
         </>
       }
-      map={<MapView />}
+      map={<MapView SOURCE={routeState.source} DESTINATION={routeState.destination}>
+        <RouteLayer path={routeState.path} />
+      </MapView>
+      }
     />
   );
 }
 
 export default App;
-// define and initialize routeState

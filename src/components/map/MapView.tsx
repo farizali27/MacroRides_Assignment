@@ -2,11 +2,12 @@ import { MapContainer, TileLayer, Marker, Popup, CircleMarker } from "react-leaf
 import "leaflet/dist/leaflet.css";
 import type { ReactNode } from "react";
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from "../../constants/config";
-import { getRandomSourceDestination, PICKUP_POINTS } from "../../constants/coordinates";
+import { PICKUP_POINTS } from "../../constants/coordinates";
 import L from "leaflet";
 import 'leaflet/dist/leaflet.css';
+import type { LatLng } from "../../types/geo";
 
-export interface MapViewProps {
+interface MapViewProps {
   /**
    * Extra layers (route, corridor, driver marker, etc.) get passed as
    * children so MapView itself stays a dumb container. This is how
@@ -15,6 +16,8 @@ export interface MapViewProps {
    * <MapContainer> to access the map context, so they can't just be
    * siblings rendered elsewhere.
    */
+  SOURCE: LatLng | null;
+  DESTINATION: LatLng | null;
   children?: ReactNode;
 }
 
@@ -34,19 +37,19 @@ export interface MapViewProps {
  * (route polyline, corridor polygons, animated driver) comes in as
  * children once Phases 2–5 build those components.
  */
-export default function MapView({ children }: MapViewProps) {
-  const {SOURCE, DESTINATION} = getRandomSourceDestination()
+export default function MapView({ SOURCE, DESTINATION, children }: MapViewProps) {
   const greenPinIcon = L.icon({
     iconUrl: "/src/assets/green_pin.png",
     iconSize: [40, 40],
-    iconAnchor: [16, 58],
-    popupAnchor: [16, -50],
+    iconAnchor: [20, 40],   // horizontal center, very bottom of image
+    popupAnchor: [0, -40],   // popup appears directly above
   });
+
   const redPinIcon = L.icon({
     iconUrl: "/src/assets/red_pin.png",
     iconSize: [40, 40],
-    iconAnchor: [16, 58],
-    popupAnchor: [16, -50],
+    iconAnchor: [20, 40],
+    popupAnchor: [0, -40],
   });
 
   return (
@@ -60,19 +63,17 @@ export default function MapView({ children }: MapViewProps) {
         url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
       />
 
-      <Marker
-        position={[SOURCE.lat, SOURCE.lng]}
-        icon={greenPinIcon}
-      >
-        <Popup>Source</Popup>
-      </Marker>
+      {SOURCE && (
+        <Marker position={[SOURCE.lat, SOURCE.lng]} icon={greenPinIcon}>
+          <Popup>Source</Popup>
+        </Marker>
+      )}
 
-      <Marker
-        position={[DESTINATION.lat, DESTINATION.lng]}
-        icon={redPinIcon}
-      >
-        <Popup>Destination</Popup>
-      </Marker>
+      {DESTINATION && (
+        <Marker position={[DESTINATION.lat, DESTINATION.lng]} icon={redPinIcon}>
+          <Popup>Destination</Popup>
+        </Marker>
+      )}
 
       {PICKUP_POINTS.map((point) => (
         <CircleMarker

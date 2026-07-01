@@ -19,7 +19,7 @@ export const H3_RESOLUTION = 9;
 export const OSRM_BASE_URL = "https://router.project-osrm.org";
 
 /** Default Leaflet map center/zoom, used until a route is loaded. */
-export const DEFAULT_MAP_CENTER: [number, number] = [26.4499, 80.3319];
+export const DEFAULT_MAP_CENTER: [number, number] = [28.606453570755868, 77.21037813107871];
 export const DEFAULT_MAP_ZOOM = 13;
 
 /** Driver simulation step interval, in milliseconds. */

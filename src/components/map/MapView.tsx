@@ -1,8 +1,10 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, CircleMarker } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import type { ReactNode } from "react";
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from "../../constants/config";
-import { SOURCE, DESTINATION, PICKUP_POINTS } from "../../constants/coordinates";
+import { getRandomSourceDestination, PICKUP_POINTS } from "../../constants/coordinates";
+import L from "leaflet";
+import 'leaflet/dist/leaflet.css';
 
 export interface MapViewProps {
   /**
@@ -33,6 +35,20 @@ export interface MapViewProps {
  * children once Phases 2–5 build those components.
  */
 export default function MapView({ children }: MapViewProps) {
+  const {SOURCE, DESTINATION} = getRandomSourceDestination()
+  const greenPinIcon = L.icon({
+    iconUrl: "/src/assets/green_pin.png",
+    iconSize: [40, 40],
+    iconAnchor: [16, 58],
+    popupAnchor: [16, -50],
+  });
+  const redPinIcon = L.icon({
+    iconUrl: "/src/assets/red_pin.png",
+    iconSize: [40, 40],
+    iconAnchor: [16, 58],
+    popupAnchor: [16, -50],
+  });
+
   return (
     <MapContainer
       center={DEFAULT_MAP_CENTER}
@@ -40,22 +56,37 @@ export default function MapView({ children }: MapViewProps) {
       style={{ height: "100%", width: "100%" }}
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; OpenStreetMap contributors &copy; CARTO'
+        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
       />
 
-      <Marker position={[SOURCE.lat, SOURCE.lng]}>
+      <Marker
+        position={[SOURCE.lat, SOURCE.lng]}
+        icon={greenPinIcon}
+      >
         <Popup>Source</Popup>
       </Marker>
 
-      <Marker position={[DESTINATION.lat, DESTINATION.lng]}>
+      <Marker
+        position={[DESTINATION.lat, DESTINATION.lng]}
+        icon={redPinIcon}
+      >
         <Popup>Destination</Popup>
       </Marker>
 
       {PICKUP_POINTS.map((point) => (
-        <Marker key={point.id} position={[point.position.lat, point.position.lng]}>
+        <CircleMarker
+          key={point.id}
+          center={[point.position.lat, point.position.lng]}
+          radius={5}
+          pathOptions={{
+            fillColor: "gray",
+            fillOpacity: 1,
+            stroke: false,
+          }}
+        >
           <Popup>{point.label}</Popup>
-        </Marker>
+        </CircleMarker>
       ))}
 
       {children}

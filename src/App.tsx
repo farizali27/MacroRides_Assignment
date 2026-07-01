@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import AppShell from "./components/layout/AppShell";
 import StatusBar from "./components/layout/StatusBar";
 import ControlPanel from "./components/layout/ControlPanel";
@@ -12,6 +12,11 @@ import { fetchOsrmRoute } from "./utils/fetchOsrmRoute";
 import { convertFormat } from "./utils/convertFormat";
 import RouteLayer from "./components/map/RouteLayer";
 import CorridorLayer from "./components/map/CorridorLayer";
+import { buildRouteLookup } from "./utils/routeInterpolation";
+import { useDriverSimulation } from "./hooks/useDriverSimulation";
+import { calculateBearing } from "./utils/bearing";
+import DriverMarker from "./components/map/DriverMarker";
+import FollowDriver from "./components/map/FollowDriver";
 
 /**
  * Top-level composition only. All state below is a placeholder so the
@@ -24,6 +29,31 @@ function App() {
   const [driverState, setDriverState] = useState(INITIAL_DRIVER_STATE);
   const [routeState, setRouteState] = useState(INITIAL_ROUTE_STATE)
   const [isRecalculating] = useState(false);
+
+  const bearing =
+    driverState.prevPosition && driverState.position
+      ? calculateBearing(
+        driverState.prevPosition,
+        driverState.position
+      )
+      : 0;
+
+  const routeLookup = useMemo(() => {
+    if (!routeState.path.length) {
+      return {
+        cumulativeDistance: [],
+        totalDistance: 0,
+      };
+    }
+
+    return buildRouteLookup(routeState.path);
+  }, [routeState.path]);
+
+  useDriverSimulation(
+    routeState.path,
+    routeLookup.cumulativeDistance,
+    setDriverState
+  );
 
   // Stub eligibility — replace with useEligiblePickups output in Phase 4.
   const eligibleCount = 0;
@@ -96,7 +126,14 @@ function App() {
       }
       map={<MapView SOURCE={routeState.source} DESTINATION={routeState.destination}>
         <RouteLayer path={routeState.path} />
+        {driverState.position &&
+          <DriverMarker
+            position={driverState.position}
+            bearing={bearing}
+          />
+        }
         <CorridorLayer path={routeState.path} />
+        <FollowDriver position={driverState.position} />
       </MapView>
       }
     />

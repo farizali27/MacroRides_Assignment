@@ -11,6 +11,7 @@ import "./App.css";
 import { fetchOsrmRoute } from "./utils/fetchOsrmRoute";
 import { convertFormat } from "./utils/convertFormat";
 import RouteLayer from "./components/map/RouteLayer";
+import CorridorLayer from "./components/map/CorridorLayer";
 
 /**
  * Top-level composition only. All state below is a placeholder so the
@@ -61,6 +62,7 @@ function App() {
         ...prevState,
         status: "error"
       }))
+
     } catch (err) {
       console.log(err)
     }
@@ -94,6 +96,7 @@ function App() {
       }
       map={<MapView SOURCE={routeState.source} DESTINATION={routeState.destination}>
         <RouteLayer path={routeState.path} />
+        <CorridorLayer path={routeState.path} />
       </MapView>
       }
     />

@@ -14,7 +14,7 @@ export default function FollowDriver({ position }: Props) {
         if (!position) return;
 
         if (firstUpdate.current) {
-            map.flyTo([position.lat, position.lng], 16, {
+            map.flyTo([position.lat, position.lng], 17, {
                 animate: true,
                 duration: 1.5,
             });

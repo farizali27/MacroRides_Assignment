@@ -8,6 +8,7 @@ export interface DriverState {
   prevPosition: LatLng | null;
   distanceTraveled: number;
   speed: number;
+  posIndex: number;
 }
 
 export const INITIAL_DRIVER_STATE: DriverState = {
@@ -15,5 +16,6 @@ export const INITIAL_DRIVER_STATE: DriverState = {
   position: null,
   prevPosition: null,
   distanceTraveled: 0,
-  speed: 50
+  speed: 50,
+  posIndex: 0,
 };

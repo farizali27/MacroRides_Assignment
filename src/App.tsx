@@ -83,6 +83,12 @@ function App() {
       destination: DESTINATION
     }))
 
+    setDriverState(prevState => ({
+      ...prevState,
+      position: SOURCE,
+      distanceTraveled: 0
+    }))
+
     const osrmURL = `http://router.project-osrm.org/route/v1/driving/${SOURCE.lng},${SOURCE.lat};${DESTINATION.lng},${DESTINATION.lat}?overview=full&geometries=geojson`
 
     console.log("running")
@@ -131,7 +137,7 @@ function App() {
         </>
       }
       map={<MapView SOURCE={routeState.source} DESTINATION={routeState.destination}>
-        <RouteLayer path={routeState.path} />
+        <RouteLayer position={driverState.position} path={routeState.path} sliceIndex={driverState.posIndex}/>
         {driverState.position &&
           <DriverMarker
             position={driverState.position}

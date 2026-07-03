@@ -17,8 +17,8 @@ function distance(a: LatLng, b: LatLng) {
     const h =
         Math.sin(dLat / 2) ** 2 +
         Math.cos(lat1) *
-            Math.cos(lat2) *
-            Math.sin(dLng / 2) ** 2;
+        Math.cos(lat2) *
+        Math.sin(dLng / 2) ** 2;
 
     return 2 * R * Math.asin(Math.sqrt(h));
 }
@@ -46,13 +46,13 @@ export function interpolatePosition(
     path: LatLng[],
     cumulative: number[],
     targetDistance: number
-): LatLng {
+): { sliceIndex: number, position: LatLng } {
 
     if (targetDistance <= 0)
-        return path[0];
+        return { sliceIndex: 1, position: path[0] };
 
     if (targetDistance >= cumulative[cumulative.length - 1])
-        return path[path.length - 1];
+        return { sliceIndex: path.length, position: path[path.length - 1] };
 
     let lo = 0;
     let hi = cumulative.length - 1;
@@ -81,7 +81,10 @@ export function interpolatePosition(
     const b = path[segmentEnd];
 
     return {
-        lat: a.lat + (b.lat - a.lat) * t,
-        lng: a.lng + (b.lng - a.lng) * t,
-    };
+        sliceIndex: segmentEnd,
+        position: {
+            lat: a.lat + (b.lat - a.lat) * t,
+            lng: a.lng + (b.lng - a.lng) * t,
+        }
+    }
 }

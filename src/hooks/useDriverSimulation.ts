@@ -27,8 +27,9 @@ export function useDriverSimulation(
                 return {
                     ...prev,
                     prevPosition: prev.position,
-                    position: nextPosition,
+                    position: nextPosition.position,
                     distanceTraveled: nextDistance,
+                    posIndex: nextPosition.sliceIndex
                 };
             });
 

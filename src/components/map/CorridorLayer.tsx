@@ -1,15 +1,12 @@
-import type { PathOptions } from 'leaflet';
-import type { LatLng } from '../../types/geo'
-import { Pane, Polygon, Polyline } from 'react-leaflet'
-import { useH3Corridor } from '../../hooks/useH3Corridor';
+import type { H3Index } from '../../types/geo'
+import { Polygon } from 'react-leaflet'
 import { cellBoundaryToLatLngs } from '../../utils/convertFormat';
 
 interface RouteLayerProps {
-  path: LatLng[]
+  corridorCells: Set<H3Index>
 }
 
-export default function CorridorLayer({ path }: RouteLayerProps) {
-  const corridorCells = useH3Corridor(path)
+export default function CorridorLayer({ corridorCells }: RouteLayerProps) {
   const corridorStyle: L.PathOptions = {
     color: '#60a5fa',   // stroke
     fillColor: '#60a5fa',   // fill

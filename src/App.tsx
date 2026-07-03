@@ -4,7 +4,7 @@ import StatusBar from "./components/layout/StatusBar";
 import ControlPanel from "./components/layout/ControlPanel";
 import Legend from "./components/layout/Legend";
 import MapView from "./components/map/MapView";
-import { getRandomSourceDestination, PICKUP_POINTS } from "./constants/coordinates";
+import { getRandomSourceDestination } from "./constants/coordinates";
 import { INITIAL_DRIVER_STATE } from "./types/simulation";
 import { INITIAL_ROUTE_STATE, type OsrmRouteResponse } from "./types/route";
 import "./App.css";
@@ -17,6 +17,10 @@ import { useDriverSimulation } from "./hooks/useDriverSimulation";
 import { calculateBearing } from "./utils/bearing";
 import DriverMarker from "./components/map/DriverMarker";
 import FollowDriver from "./components/map/FollowDriver";
+import { useH3Corridor } from "./hooks/useH3Corridor";
+import { useSetPickupPoints } from "./hooks/useSetPickupPoints";
+import PickupPointsLayer from "./components/map/PickupPointsLayer";
+import { PICKUP_POINTS } from "./constants/pickups";
 
 /**
  * Top-level composition only. All state below is a placeholder so the
@@ -48,6 +52,9 @@ function App() {
 
     return buildRouteLookup(routeState.path);
   }, [routeState.path]);
+
+  const h3Cells = useH3Corridor(routeState.path);
+  const pickupPoints = useSetPickupPoints(PICKUP_POINTS, h3Cells)
 
   useDriverSimulation(
     routeState.path,
@@ -88,13 +95,12 @@ function App() {
         status: "ready",
         path: route
       }))
+    } catch (err) {
+      console.log(err)
       setRouteState(prevState => ({
         ...prevState,
         status: "error"
       }))
-
-    } catch (err) {
-      console.log(err)
     }
   };
 
@@ -132,8 +138,9 @@ function App() {
             bearing={bearing}
           />
         }
-        <CorridorLayer path={routeState.path} />
+        <CorridorLayer corridorCells={h3Cells} />
         <FollowDriver position={driverState.position} />
+        <PickupPointsLayer pickupPoints={pickupPoints} />
       </MapView>
       }
     />

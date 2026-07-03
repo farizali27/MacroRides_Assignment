@@ -4,7 +4,7 @@ import type { H3Index, LatLng } from "../types/geo";
 const H3_RESOLUTION = 10;
 const H3_DISK_RADIUS = 3;
 
-export function generateH3Corridor(path: LatLng[]): H3Index[] {
+export function generateH3Corridor(path: LatLng[]): Set<H3Index> {
     const cellSet = new Set<H3Index>();
 
     for (const { lat, lng } of path) {
@@ -14,5 +14,5 @@ export function generateH3Corridor(path: LatLng[]): H3Index[] {
             cellSet.add(cell);
         }
     }
-    return [...cellSet];
+    return cellSet;
 }

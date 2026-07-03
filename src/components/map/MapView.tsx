@@ -1,8 +1,7 @@
-import { MapContainer, TileLayer, Marker, Popup, CircleMarker } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import type { ReactNode } from "react";
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from "../../constants/config";
-import { PICKUP_POINTS } from "../../constants/coordinates";
 import L from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import type { LatLng } from "../../types/geo";
@@ -21,22 +20,6 @@ interface MapViewProps {
   children?: ReactNode;
 }
 
-/**
- * Leaflet 101, since this is likely your first time touching it:
- * - <MapContainer> owns the actual Leaflet map instance and viewport state
- *   (center/zoom). Nothing renders without one.
- * - <TileLayer> is the visual basemap (the actual map imagery) — here it's
- *   OpenStreetMap's free tile server. Swappable later if you want a
- *   different look.
- * - <Marker> drops a pin at a LatLng; <Popup> is the little box that opens
- *   on click. Leaflet expects [lat, lng] arrays or {lat, lng} objects —
- *   NOT GeoJSON's [lng, lat] order.
- *
- * Right now this only renders the hardcoded source/destination/pickup
- * markers, so Phase 1 has a working starting point. Everything else
- * (route polyline, corridor polygons, animated driver) comes in as
- * children once Phases 2–5 build those components.
- */
 export default function MapView({ SOURCE, DESTINATION, children }: MapViewProps) {
   const greenPinIcon = L.icon({
     iconUrl: "/src/assets/green_pin.png",
@@ -74,22 +57,6 @@ export default function MapView({ SOURCE, DESTINATION, children }: MapViewProps)
           <Popup>Destination</Popup>
         </Marker>
       )}
-
-      {PICKUP_POINTS.map((point) => (
-        <CircleMarker
-          key={point.id}
-          center={[point.position.lat, point.position.lng]}
-          radius={5}
-          pathOptions={{
-            fillColor: "gray",
-            fillOpacity: 1,
-            stroke: false,
-          }}
-        >
-          <Popup>{point.label}</Popup>
-        </CircleMarker>
-      ))}
-
       {children}
     </MapContainer>
   );

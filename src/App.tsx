@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import AppShell from "./components/layout/AppShell";
 import StatusBar from "./components/layout/StatusBar";
 import ControlPanel from "./components/layout/ControlPanel";
@@ -59,18 +59,18 @@ function App() {
   useDriverSimulation(
     routeState.path,
     routeLookup.cumulativeDistance,
-    setDriverState
+    setDriverState,
+    driverState.status
   );
 
-  // Stub eligibility — replace with useEligiblePickups output in Phase 4.
   const eligibleCount = 0;
 
   const handleStartDrive = () => {
-    // TODO (Phase 5): kick off useDriverSimulation
+    setDriverState(prev => ({...prev, status: "driving"}))
   };
 
   const handlePauseDrive = () => {
-    // TODO (Phase 5): pause useDriverSimulation
+    setDriverState(prev => ({...prev, status: "paused"}))
   };
 
   const runSimulation = async () => {
@@ -101,6 +101,7 @@ function App() {
         status: "ready",
         path: route
       }))
+      handleStartDrive()
     } catch (err) {
       console.log(err)
       setRouteState(prevState => ({
@@ -137,14 +138,12 @@ function App() {
         </>
       }
       map={<MapView SOURCE={routeState.source} DESTINATION={routeState.destination}>
-        <RouteLayer position={driverState.position} path={routeState.path} sliceIndex={driverState.posIndex}/>
-        {driverState.position &&
-          <DriverMarker
-            position={driverState.position}
-            bearing={bearing}
-          />
-        }
-        <CorridorLayer corridorCells={h3Cells} />
+        {routeState.status === "ready" && <RouteLayer position={driverState.position} path={routeState.path} sliceIndex={driverState.posIndex} />}
+        {routeState.status === "ready" && <DriverMarker
+          position={driverState.position!}
+          bearing={bearing}
+        />}
+        {routeState.status === "ready" && <CorridorLayer corridorCells={h3Cells} />}
         <FollowDriver position={driverState.position} />
         <PickupPointsLayer pickupPoints={pickupPoints} />
       </MapView>

@@ -5,6 +5,8 @@ import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from "../../constants/config";
 import L from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import type { LatLng } from "../../types/geo";
+import greenPin from "../../assets/green_pin.png"
+import redPin from "../../assets/red_pin.png";
 
 
 interface MapViewProps {
@@ -15,14 +17,14 @@ interface MapViewProps {
 
 function MapView({ SOURCE, DESTINATION, children }: MapViewProps) {
   const greenPinIcon = L.icon({
-    iconUrl: "/src/assets/green_pin.png",
+    iconUrl: greenPin,
     iconSize: [40, 40],
     iconAnchor: [20, 40],
     popupAnchor: [0, -40],
   });
 
   const redPinIcon = L.icon({
-    iconUrl: "/src/assets/red_pin.png",
+    iconUrl: redPin,
     iconSize: [40, 40],
     iconAnchor: [20, 40],
     popupAnchor: [0, -40],

@@ -1,7 +1,3 @@
-/* App-level layout grid. Kept here rather than as Tailwind utility soup
-   because this exact shape (fixed sidebar, fluid map) gets referenced from
-   a few places and is easier to reason about as one named block. */
-
 .app-shell {
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr;
@@ -26,8 +22,6 @@
   width: 100%;
 }
 
-/* Stack sidebar above map on narrow viewports instead of squeezing both
-   into columns. */
 @media (max-width: 768px) {
   .app-shell {
     grid-template-columns: 1fr;

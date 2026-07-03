@@ -1,10 +1,5 @@
 import type { GeoJsonLineString, LatLng } from "./geo";
 
-/**
- * Shape of the pieces of an OSRM /route response you actually need.
- * OSRM returns more than this (legs, steps, waypoints) — extend as you
- * need more of it during Phase 2.
- */
 export interface OsrmRouteResponse {
   code: string;
   routes: OsrmRoute[];

@@ -5,6 +5,5 @@ export async function fetchOsrmRoute<T>(url: string): Promise<T> {
     throw new Error(`HTTP error! Status: ${response.status}`);
   }
   
-  // Awaiting the JSON and casting it to our expected generic type
   return (await response.json()) as T;
 }

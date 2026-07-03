@@ -1,12 +1,5 @@
 import type { LatLng } from "../types/geo";
 
-/**
- * Hardcoded per the assignment's scope decisions. Swap these for any city —
- * nothing downstream assumes a specific location, just real road network
- * coverage (OSRM's public demo server covers most of the world, but quality
- * varies — test your specific points once you wire up Phase 2).
- */
-
 const sourceDestinationPoints: LatLng[] = [
   { lat: 28.62769919667135, lng: 77.21596579195723 },
   { lat: 28.5900130311213, lng: 77.24734583598209 },

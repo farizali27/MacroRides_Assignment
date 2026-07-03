@@ -71,7 +71,7 @@ async function buildUnionCorridor() {
 
             const corridor = generateH3Corridor(path);
 
-            for (const cell of corridor) {
+            for (const [cell, lastSeen] of corridor) {
                 union.add(cell);
             }
 

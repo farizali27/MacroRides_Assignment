@@ -17,5 +17,5 @@ export const INITIAL_DRIVER_STATE: DriverState = {
   prevPosition: null,
   distanceTraveled: 0,
   speed: 50,
-  posIndex: 0,
+  posIndex: -1,
 };

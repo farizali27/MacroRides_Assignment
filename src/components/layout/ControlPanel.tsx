@@ -1,10 +1,8 @@
+import { memo } from "react";
 import type { DriverSimulationStatus } from "../../types/simulation";
 
 export interface ControlPanelProps {
-  /** Whether the driver simulation is currently running. */
   driverStatus: DriverSimulationStatus;
-  /** Whether a deviation is already active (disable re-triggering if so, or relabel — your call in Phase 6). */
-  /** Disable controls while a route/corridor recalculation is in flight. */
   isRecalculating: boolean;
   onResumeDrive: () => void;
   onPauseDrive: () => void;
@@ -12,12 +10,7 @@ export interface ControlPanelProps {
   onSimulateDeviation: () => void;
 }
 
-/**
- * Structural shell only. Every handler below is a stub passed down from
- * App.tsx — none of them do anything yet. Wire them up once
- * useDriverSimulation (Phase 5) and the deviation logic (Phase 6) exist.
- */
-export default function ControlPanel({
+function ControlPanel({
   driverStatus,
   isRecalculating,
   onResumeDrive,
@@ -84,3 +77,5 @@ export default function ControlPanel({
     </section>
   );
 }
+
+export default memo(ControlPanel)

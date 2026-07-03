@@ -1,12 +1,13 @@
 import { CircleMarker, Popup } from 'react-leaflet'
 import type { PickupPoint } from '../../types/pickup';
 import type { PathOptions } from 'leaflet';
+import { memo } from 'react';
 
 interface RouteLayerProps {
   pickupPoints: PickupPoint[]
 }
 
-export default function PickupPointsLayer({ pickupPoints }: RouteLayerProps) {
+function PickupPointsLayer({ pickupPoints }: RouteLayerProps) {
   const greenOption: PathOptions = {
   color: '#16a34a',      // Border
   fillColor: '#22c55e',  // Fill
@@ -36,3 +37,4 @@ const greyOption: PathOptions = {
   )
 }
 
+export default memo(PickupPointsLayer)

@@ -53,7 +53,7 @@ function App() {
     return buildRouteLookup(routeState.path);
   }, [routeState.path]);
 
-  const h3Cells = useH3Corridor(routeState.path);
+  const h3Cells = useH3Corridor(routeState.path, driverState.posIndex);
   const pickupPoints = useSetPickupPoints(PICKUP_POINTS, h3Cells)
 
   useDriverSimulation(

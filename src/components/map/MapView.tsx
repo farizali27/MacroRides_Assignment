@@ -1,6 +1,6 @@
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import type { ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from "../../constants/config";
 import L from "leaflet";
 import 'leaflet/dist/leaflet.css';
@@ -20,7 +20,7 @@ interface MapViewProps {
   children?: ReactNode;
 }
 
-export default function MapView({ SOURCE, DESTINATION, children }: MapViewProps) {
+ function MapView({ SOURCE, DESTINATION, children }: MapViewProps) {
   const greenPinIcon = L.icon({
     iconUrl: "/src/assets/green_pin.png",
     iconSize: [40, 40],
@@ -61,3 +61,5 @@ export default function MapView({ SOURCE, DESTINATION, children }: MapViewProps)
     </MapContainer>
   );
 }
+
+export default memo(MapView)

@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 interface LegendItem {
   label: string;
   colorVar: string;
@@ -49,7 +51,7 @@ function LegendSwatch({ colorVar, shape }: Pick<LegendItem, "colorVar" | "shape"
  * since the legend describes fixed visual conventions, not live data.
  * If you add new layers/colors later, add an entry here to match.
  */
-export default function Legend() {
+function Legend() {
   return (
     <section
       aria-label="Map legend"
@@ -75,3 +77,5 @@ export default function Legend() {
     </section>
   );
 }
+
+export default memo(Legend)

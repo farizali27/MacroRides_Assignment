@@ -2,22 +2,24 @@ import { memo } from "react";
 import type { DriverSimulationStatus } from "../../types/simulation";
 
 export interface ControlPanelProps {
+  routeStatus: "idle" | "loading" | "ready" | "error";
   driverStatus: DriverSimulationStatus;
-  isRecalculating: boolean;
   onResumeDrive: () => void;
   onPauseDrive: () => void;
   onRunSimulation: () => void;
-  onSimulateDeviation: () => void;
+  onChangeDestination: () => void;
 }
 
 function ControlPanel({
+  routeStatus,
   driverStatus,
-  isRecalculating,
   onResumeDrive,
   onPauseDrive,
   onRunSimulation,
-  onSimulateDeviation,
+  onChangeDestination,
 }: ControlPanelProps) {
+  const isLoading = routeStatus === "loading";
+
   return (
     <section
       aria-label="Simulation controls"
@@ -36,30 +38,30 @@ function ControlPanel({
         <button
           type="button"
           onClick={driverStatus === "driving" ? onPauseDrive : onResumeDrive}
-          disabled={isRecalculating || driverStatus === "idle"}
+          disabled={isLoading || driverStatus === "idle"}
           className="text-sm font-medium rounded-sm px-3 py-2 transition-colors
              bg-[var(--color-driver)] text-[var(--color-bg)]
              hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {driverStatus === "paused" ? "Resume Drive" : "Pause Drive"}
+          {driverStatus === "paused" ? "Resume" : "Pause"}
         </button>
 
         <button
           type="button"
-          onClick={onSimulateDeviation}
-          disabled={isRecalculating || driverStatus === "idle"}
+          onClick={onChangeDestination}
+          disabled={driverStatus === "idle"}
           className="text-sm font-medium rounded-sm px-3 py-2 transition-colors border
              border-[var(--color-deviation)] text-[var(--color-deviation)]
              hover:bg-[var(--color-deviation)] hover:text-[var(--color-bg)]
              disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          Change Destination
+          {isLoading ? "Recalculating..." : "Change Destination"}
         </button>
 
         <button
           type="button"
           onClick={onRunSimulation}
-          disabled={isRecalculating || driverStatus !== "idle"}
+          disabled={isLoading || driverStatus !== "idle"}
           className="cursor-pointer text-sm font-medium rounded-sm px-3 py-2 transition-colors border
              border-[var(--color-text-muted)] text-[var(--color-text-muted)]
              hover:border-[var(--color-text)] hover:text-[var(--color-text)]
@@ -67,12 +69,6 @@ function ControlPanel({
         >
           Run Simulation
         </button>
-
-        {isRecalculating && (
-          <p className="text-xs mt-1" style={{ color: "var(--color-text-muted)" }} role="status">
-            Recalculating route, corridor, and eligibility…
-          </p>
-        )}
       </div>
     </section>
   );

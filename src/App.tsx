@@ -1,10 +1,10 @@
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import AppShell from "./components/layout/AppShell";
 import StatusBar from "./components/layout/StatusBar";
 import ControlPanel from "./components/layout/ControlPanel";
 import Legend from "./components/layout/Legend";
 import MapView from "./components/map/MapView";
-import { getRandomSourceDestination } from "./constants/coordinates";
+import { getRandomDestination, getRandomSourceDestination } from "./constants/coordinates";
 import { INITIAL_DRIVER_STATE } from "./types/simulation";
 import { INITIAL_ROUTE_STATE, type OsrmRouteResponse } from "./types/route";
 import "./App.css";
@@ -21,26 +21,19 @@ import { useH3Corridor } from "./hooks/useH3Corridor";
 import { useSetPickupPoints } from "./hooks/useSetPickupPoints";
 import PickupPointsLayer from "./components/map/PickupPointsLayer";
 import { PICKUP_POINTS } from "./constants/pickups";
+import type { LatLng } from "./types/geo";
 
-/**
- * Top-level composition only. All state below is a placeholder so the
- * layout shells have something to render and type-check against — none
- * of it is wired to real logic yet. Replace these useState calls with your
- * actual hooks (useOsrmRoute, useCorridor, useEligiblePickups,
- * useDriverSimulation) as you build through the roadmap phases.
- */
 function App() {
   const [driverState, setDriverState] = useState(INITIAL_DRIVER_STATE);
   const [routeState, setRouteState] = useState(INITIAL_ROUTE_STATE)
-  const [isRecalculating] = useState(false);
 
-  const bearing =
-    driverState.prevPosition && driverState.position
-      ? calculateBearing(
-        driverState.prevPosition,
-        driverState.position
-      )
-      : 0;
+  const bearing = useMemo(
+    () =>
+      driverState.prevPosition && driverState.position
+        ? calculateBearing(driverState.prevPosition, driverState.position)
+        : 0,
+    [driverState.prevPosition, driverState.position]
+  );
 
   const routeLookup = useMemo(() => {
     if (!routeState.path.length) {
@@ -53,6 +46,12 @@ function App() {
     return buildRouteLookup(routeState.path);
   }, [routeState.path]);
 
+  const remainingDistance = useMemo(() => {
+    if (!routeLookup.totalDistance || !driverState.distanceTraveled) return null;
+    return Math.max(0, routeLookup.totalDistance - driverState.distanceTraveled);
+  }, [routeLookup.totalDistance, driverState.distanceTraveled]);
+
+
   const h3Cells = useH3Corridor(routeState.path, driverState.posIndex);
   const pickupPoints = useSetPickupPoints(PICKUP_POINTS, h3Cells)
 
@@ -63,76 +62,100 @@ function App() {
     driverState.status
   );
 
-  const eligibleCount = 0;
+  const eligibleCount = useMemo(
+    () => pickupPoints.filter(p => p.isEligible).length,
+    [pickupPoints]
+  );
 
-  const handleStartDrive = () => {
-    setDriverState(prev => ({...prev, status: "driving"}))
-  };
+  const handleStartDrive = useCallback(() => {
+    setDriverState(prev => ({ ...prev, status: "driving" }))
+  }, [])
 
-  const handlePauseDrive = () => {
-    setDriverState(prev => ({...prev, status: "paused"}))
-  };
+  const handlePauseDrive = useCallback(() => {
+    setDriverState(prev => ({ ...prev, status: "paused" }))
+  }, [])
 
-  const runSimulation = async () => {
-    // TODO (Phase 5/6): reset driver position, clear any deviation state
+  const loadRoute = useCallback(
+    async (
+      source: LatLng,
+      destination: LatLng,
+      bearing?: number
+    ) => {
+      setRouteState(prev => ({
+        ...prev,
+        status: "loading",
+        source,
+        destination,
+      }));
+
+      setDriverState(prev => ({
+        ...prev,
+        position: source,
+        distanceTraveled: 0,
+      }));
+
+      const url = bearing ?
+        `http://router.project-osrm.org/route/v1/driving/${source.lng},${source.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson&bearings=${bearing},20;`
+        : `http://router.project-osrm.org/route/v1/driving/${source.lng},${source.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson`
+
+      try {
+        const data = await fetchOsrmRoute<OsrmRouteResponse>(url);
+
+        const route = convertFormat(
+          data.routes[0].geometry.coordinates
+        );
+
+        setRouteState(prev => ({
+          ...prev,
+          status: "ready",
+          path: route,
+        }));
+
+        handleStartDrive();
+      } catch (err) {
+        console.error(err);
+
+        setRouteState(prev => ({
+          ...prev,
+          status: "error",
+        }));
+      }
+    }, [handleStartDrive])
+
+
+  const runSimulation = useCallback(async () => {
     const { SOURCE, DESTINATION } = getRandomSourceDestination()
-    setRouteState(prevState => ({
-      ...prevState,
-      status: "loading",
-      source: SOURCE,
-      destination: DESTINATION
-    }))
+    await loadRoute(SOURCE, DESTINATION)
+  }, [loadRoute])
 
-    setDriverState(prevState => ({
-      ...prevState,
-      position: SOURCE,
-      distanceTraveled: 0
-    }))
-
-    const osrmURL = `http://router.project-osrm.org/route/v1/driving/${SOURCE.lng},${SOURCE.lat};${DESTINATION.lng},${DESTINATION.lat}?overview=full&geometries=geojson`
-
-    console.log("running")
-    try {
-      const data = await fetchOsrmRoute<OsrmRouteResponse>(osrmURL);
-      const osrmRoute = data.routes[0].geometry.coordinates
-      const route = convertFormat(osrmRoute)
-      setRouteState(prevState => ({
-        ...prevState,
-        status: "ready",
-        path: route
-      }))
-      handleStartDrive()
-    } catch (err) {
-      console.log(err)
-      setRouteState(prevState => ({
-        ...prevState,
-        status: "error"
-      }))
-    }
-  };
-
-  const handleSimulateDeviation = () => {
-    // TODO (Phase 6): pick a deviation point, re-run OSRM + corridor + eligibility
-  };
+  const handleChangeDestination = useCallback(async () => {
+    handlePauseDrive()
+    const source = driverState.position
+    if (!source) return
+    const destination = getRandomDestination()
+    await loadRoute(source, destination, Math.round(bearing))
+  }, [handlePauseDrive, driverState, loadRoute])
 
   return (
     <AppShell
       sidebar={
         <>
           <StatusBar
+            routeStatus={routeState.status}
             driverStatus={driverState.status}
             driverPosition={driverState.position}
             eligibleCount={eligibleCount}
             totalPickupCount={PICKUP_POINTS.length}
-            routeDistanceMeters={null}
+            totalDistanceMeters={routeLookup.totalDistance || null}
+            remainingDistanceMeters={remainingDistance}
           />
           <ControlPanel
             driverStatus={driverState.status}
-            isRecalculating={isRecalculating}
+            routeStatus={routeState.status}
             onResumeDrive={handleStartDrive}
             onPauseDrive={handlePauseDrive}
             onRunSimulation={runSimulation}
-            onSimulateDeviation={handleSimulateDeviation}
+            onChangeDestination={handleChangeDestination}
           />
           <Legend />
         </>

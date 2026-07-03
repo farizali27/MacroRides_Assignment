@@ -2,16 +2,13 @@ import type { DriverSimulationStatus } from "../../types/simulation";
 import type { LatLng } from "../../types/geo";
 
 export interface StatusBarProps {
-  /** Current high-level state of the driver simulation. */
+  routeStatus: "idle" | "loading" | "ready" | "error";
   driverStatus: DriverSimulationStatus;
-  /** Driver's current position, or null before simulation starts. */
   driverPosition: LatLng | null;
-  /** Count of pickup points currently inside the corridor. */
   eligibleCount: number;
-  /** Total number of pickup points being tracked. */
   totalPickupCount: number;
-  /** Route distance in meters, once OSRM has returned a route. */
-  routeDistanceMeters: number | null;
+  totalDistanceMeters: number | null;
+  remainingDistanceMeters: number | null;
 }
 
 const STATUS_LABEL: Record<DriverSimulationStatus, string> = {
@@ -35,18 +32,14 @@ function formatDistance(meters: number | null): string {
   return meters >= 1000 ? `${(meters / 1000).toFixed(2)} km` : `${meters.toFixed(0)} m`;
 }
 
-/**
- * Structural shell only — no logic. Wire `driverPosition`, `driverStatus`,
- * and the counts up from your hooks once Phases 3–5 are in place. Every
- * value here is rendered as plain mono-digit text on purpose: this panel
- * is meant to read like a live telemetry readout, not a card.
- */
 export default function StatusBar({
+  routeStatus,
   driverStatus,
   driverPosition,
   eligibleCount,
   totalPickupCount,
-  routeDistanceMeters,
+  totalDistanceMeters,
+  remainingDistanceMeters,
 }: StatusBarProps) {
   return (
     <section
@@ -62,13 +55,42 @@ export default function StatusBar({
         <h2 className="text-xs uppercase tracking-wide" style={{ color: "var(--color-text-muted)" }}>
           Status
         </h2>
-        <span
-          className="text-xs font-medium uppercase tracking-wide"
-          style={{ color: STATUS_COLOR_VAR[driverStatus] }}
-        >
-          ● {STATUS_LABEL[driverStatus]}
-        </span>
+        {routeStatus === "loading" ? (
+          <span
+            className="text-xs font-medium uppercase tracking-wide animate-pulse"
+            style={{ color: "var(--color-accent)" }}
+          >
+            ● Recalculating…
+          </span>
+        ) : routeStatus === "error" ? (
+          <span
+            className="text-xs font-medium uppercase tracking-wide"
+            style={{ color: "var(--color-danger)" }}
+          >
+            ● Route Error
+          </span>
+        ) : (
+          <span
+            className="text-xs font-medium uppercase tracking-wide"
+            style={{ color: STATUS_COLOR_VAR[driverStatus] }}
+          >
+            ● {STATUS_LABEL[driverStatus]}
+          </span>
+        )}
       </header>
+
+      {routeStatus === "error" && (
+        <p
+          className="text-xs mb-3 p-2 rounded"
+          style={{
+            color: "var(--color-danger)",
+            backgroundColor: "rgba(239,68,68,0.08)",
+            borderRadius: "var(--radius-sm)",
+          }}
+        >
+          Failed to fetch route. Check connection and try again.
+        </p>
+      )}
 
       <dl className="grid grid-cols-2 gap-y-2 gap-x-3 text-sm" style={{ fontFamily: "var(--font-mono)" }}>
         <dt style={{ color: "var(--color-text-muted)" }}>Lat</dt>
@@ -81,8 +103,11 @@ export default function StatusBar({
           {driverPosition ? formatCoordinate(driverPosition.lng) : "—"}
         </dd>
 
-        <dt style={{ color: "var(--color-text-muted)" }}>Route dist.</dt>
-        <dd className="text-right">{formatDistance(routeDistanceMeters)}</dd>
+        <dt style={{ color: "var(--color-text-muted)" }}>Total dist.</dt>
+        <dd className="text-right">{formatDistance(totalDistanceMeters)}</dd>
+
+        <dt style={{ color: "var(--color-text-muted)" }}>Remaining</dt>
+        <dd className="text-right">{formatDistance(remainingDistanceMeters)}</dd>
 
         <dt style={{ color: "var(--color-text-muted)" }}>Eligible pickups</dt>
         <dd className="text-right">
@@ -92,4 +117,3 @@ export default function StatusBar({
     </section>
   );
 }
-// add distanceRemaining to the status bar

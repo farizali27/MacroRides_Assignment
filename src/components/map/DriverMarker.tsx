@@ -18,8 +18,8 @@ export default function DriverMarker({
     <div
       style="
         transform: rotate(${bearing}deg);
-        width: 32px;
-        height: 32px;
+        width: 26px;
+        height: 26px;
       "
     >
       <svg

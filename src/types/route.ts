@@ -16,10 +16,8 @@ export interface OsrmRoute {
   duration: number; // seconds
 }
 
-/** What the rest of the app actually consumes, after Phase 2 processing. */
 export interface RouteState {
   status: "idle" | "loading" | "ready" | "error";
-  /** Leaflet-ready coordinates, already converted from OSRM's [lng, lat]. */
   path: LatLng[];
   source: LatLng | null;
   destination: LatLng | null;

@@ -95,8 +95,8 @@ function App() {
       }));
 
       const url = bearing ?
-        `http://router.project-osrm.org/route/v1/driving/${source.lng},${source.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson&bearings=${bearing},20;`
-        : `http://router.project-osrm.org/route/v1/driving/${source.lng},${source.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson`
+        `https://router.project-osrm.org/route/v1/driving/${source.lng},${source.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson&bearings=${bearing},20;`
+        : `https://router.project-osrm.org/route/v1/driving/${source.lng},${source.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson`
 
       try {
         const data = await fetchOsrmRoute<OsrmRouteResponse>(url);
